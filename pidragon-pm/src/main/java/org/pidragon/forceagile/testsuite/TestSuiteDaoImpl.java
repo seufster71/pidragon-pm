@@ -10,32 +10,29 @@
  * @author Edward H. Seufert
  */
 
-package org.pidragon.forceagile.backlog;
+package org.pidragon.forceagile.testsuite;
 
 import org.pidragon.forceagile.common.FABaseDaoImpl;
-import org.pidragon.forceagile.model.BackLog;
+import org.pidragon.forceagile.model.TestSuite;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.toasthub.core.general.model.GlobalConstant;
 import org.toasthub.core.general.model.RestRequest;
 import org.toasthub.core.general.model.RestResponse;
 
-@Repository("FABaseDao")
+@Repository("TestSuiteDao")
 @Transactional("TransactionManagerData")
-public class BackLogDaoImpl extends FABaseDaoImpl implements BackLogDao {
+public class TestSuiteDaoImpl extends FABaseDaoImpl implements TestSuiteDao{
 
-
+	@Override
 	public void save(RestRequest request, RestResponse response) throws Exception {
-		BackLog backLog = (BackLog) request.getParam(BackLog.BACKLOG);
-		if (backLog == null) {
-			utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Missing param", response);
-		}
-		entityManagerDataSvc.getInstance().merge(backLog);
-		response.addParam(BackLog.ID, backLog.getId());
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(RestRequest request, RestResponse response) throws Exception {
+		TestSuite testSuite = (TestSuite) entityManagerDataSvc.getInstance().getReference(TestSuite.class, new Long((Integer) request.getParam("id")));
+		entityManagerDataSvc.getInstance().remove(testSuite);
 	}
 	
-	public void delete(RestRequest request, RestResponse response) throws Exception {
-		BackLog backLog = (BackLog) entityManagerDataSvc.getInstance().getReference(BackLog.class, new Long((Integer) request.getParam(GlobalConstant.ID)));
-		entityManagerDataSvc.getInstance().remove(backLog);
-	}
 }

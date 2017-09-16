@@ -10,32 +10,30 @@
  * @author Edward H. Seufert
  */
 
-package org.pidragon.forceagile.backlog;
+package org.pidragon.forceagile.release;
 
 import org.pidragon.forceagile.common.FABaseDaoImpl;
-import org.pidragon.forceagile.model.BackLog;
+import org.pidragon.forceagile.model.Release;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.toasthub.core.general.model.GlobalConstant;
 import org.toasthub.core.general.model.RestRequest;
 import org.toasthub.core.general.model.RestResponse;
 
-@Repository("FABaseDao")
+@Repository("ReleaseDao")
 @Transactional("TransactionManagerData")
-public class BackLogDaoImpl extends FABaseDaoImpl implements BackLogDao {
-
-
+public class ReleaseDaoImpl extends FABaseDaoImpl implements ReleaseDao {
+	
 	public void save(RestRequest request, RestResponse response) throws Exception {
-		BackLog backLog = (BackLog) request.getParam(BackLog.BACKLOG);
-		if (backLog == null) {
+		Release release = (Release) request.getParam(Release.CODEREPO);
+		if (release == null) {
 			utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Missing param", response);
 		}
-		entityManagerDataSvc.getInstance().merge(backLog);
-		response.addParam(BackLog.ID, backLog.getId());
+		entityManagerDataSvc.getInstance().merge(release);
+		response.addParam(Release.ID, release.getId());	
 	}
 	
 	public void delete(RestRequest request, RestResponse response) throws Exception {
-		BackLog backLog = (BackLog) entityManagerDataSvc.getInstance().getReference(BackLog.class, new Long((Integer) request.getParam(GlobalConstant.ID)));
-		entityManagerDataSvc.getInstance().remove(backLog);
+		Release release = (Release) entityManagerDataSvc.getInstance().getReference(Release.class, new Long((Integer) request.getParam("id")));
+		entityManagerDataSvc.getInstance().remove(release);
 	}
 }

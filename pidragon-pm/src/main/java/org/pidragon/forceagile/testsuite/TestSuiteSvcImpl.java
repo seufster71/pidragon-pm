@@ -10,12 +10,10 @@
  * @author Edward H. Seufert
  */
 
-package org.pidragon.forceagile.blueprint;
+package org.pidragon.forceagile.testsuite;
 
-import org.pidragon.forceagile.model.BluePrint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 import org.toasthub.core.common.UtilSvc;
 import org.toasthub.core.general.handler.ServiceProcessor;
 import org.toasthub.core.general.model.GlobalConstant;
@@ -23,19 +21,18 @@ import org.toasthub.core.general.model.RestRequest;
 import org.toasthub.core.general.model.RestResponse;
 import org.toasthub.core.preference.model.AppCachePageUtil;
 
-@Service("BluePrintSvc")
-public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
+public class TestSuiteSvcImpl implements ServiceProcessor, TestSuiteSvc {
 
 	@Autowired
-	@Qualifier("BluePrintDao")
-	BluePrintDao bluePrintDao;
+	@Qualifier("TestSuiteDao")
+	TestSuiteDao testSuiteDao;
 	
 	@Autowired
 	UtilSvc utilSvc;
+	
 	@Autowired
 	AppCachePageUtil appCachePageUtil;
 	
-	@Override
 	public void process(RestRequest request, RestResponse response) {
 		String action = (String) request.getParams().get(GlobalConstant.ACTION);
 		
@@ -49,15 +46,17 @@ public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
 			if (count != null && count > 0){
 				this.items(request, response);
 			}
+			response.addParam(GlobalConstant.ITEMNAME, request.getParam(GlobalConstant.ITEMNAME));
 			break;
 		case "LIST":
 			request.addParam(AppCachePageUtil.APPPAGEPARAMLOC, AppCachePageUtil.RESPONSE);
 			appCachePageUtil.getPageInfo(request,response);
 			this.itemCount(request, response);
-			count = (Long) response.getParam("count");
+			count = (Long) response.getParam(GlobalConstant.ITEMCOUNT);
 			if (count != null && count > 0){
 				this.items(request, response);
 			}
+			response.addParam(GlobalConstant.ITEMNAME, request.getParam(GlobalConstant.ITEMNAME));
 			break;
 		case "SHOW":
 			this.item(request, response);
@@ -67,7 +66,7 @@ public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
 			this.save(request, response);
 			break;
 		case "DELETE":
-			delete(request, response);
+			this.delete(request, response);
 			break;
 		default:
 			utilSvc.addStatus(RestResponse.INFO, RestResponse.ACTIONNOTEXIST, "Action not available", response);
@@ -77,7 +76,7 @@ public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
 	
 	protected void itemCount(RestRequest request, RestResponse response) {
 		try {
-			bluePrintDao.itemCount(request, response);
+			testSuiteDao.itemCount(request, response);
 		} catch (Exception e) {
 			utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Save Failed", response);
 			e.printStackTrace();
@@ -86,7 +85,7 @@ public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
 	
 	protected void items(RestRequest request, RestResponse response) {
 		try {
-			bluePrintDao.items(request, response);
+			testSuiteDao.items(request, response);
 		} catch (Exception e) {
 			utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Save Failed", response);
 			e.printStackTrace();
@@ -95,7 +94,7 @@ public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
 	
 	protected void item(RestRequest request, RestResponse response) {
 		try {
-			bluePrintDao.item(request, response);
+			testSuiteDao.item(request, response);
 		} catch (Exception e) {
 			utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Save Failed", response);
 			e.printStackTrace();
@@ -105,28 +104,7 @@ public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
 	//@Authorize
 	protected void save(RestRequest request, RestResponse response){
 		try {
-			// validate
-			utilSvc.validateParams(request, response);
-			
-			if ((Boolean) request.getParam(GlobalConstant.VALID) == false) {
-				utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Validation Error", response);
-				return;
-			}
-			// get existing item
-			if (request.containsParam(GlobalConstant.ITEMID) && !request.getParam(GlobalConstant.ITEMID).equals("")) {
-				bluePrintDao.item(request, response);
-				request.addParam(GlobalConstant.ITEM, response.getParam(GlobalConstant.ITEM));
-				response.getParams().remove(GlobalConstant.ITEM);
-			} else {
-				request.addParam(GlobalConstant.ITEM, new BluePrint());
-			}
-			// marshall
-			utilSvc.marshallFields(request, response);
-			
-			// save
-			bluePrintDao.save(request, response);
-			
-			utilSvc.addStatus(RestResponse.INFO, RestResponse.SUCCESS, "Save Successful", response);
+			testSuiteDao.save(request, response);
 		} catch (Exception e) {
 			utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Save Failed", response);
 			e.printStackTrace();
@@ -136,7 +114,7 @@ public class BluePrintSvcImpl implements ServiceProcessor, BluePrintSvc {
 	//@Authorize
 	protected void delete(RestRequest request, RestResponse response){
 		try {
-			bluePrintDao.delete(request, response);
+			testSuiteDao.delete(request, response);
 			utilSvc.addStatus(RestResponse.INFO, RestResponse.SUCCESS, "Delete successful", response);
 		} catch (Exception e) {
 			utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Delete Failed", response);

@@ -39,7 +39,7 @@ public class FABaseDaoImpl implements FABaseDao{
 	@Autowired
 	protected UtilSvc utilSvc;
 
-	
+	@Override
 	public void items(RestRequest request, RestResponse response) throws Exception {
 		String itemName = (String) request.getParam(GlobalConstant.ITEMNAME);
 		String queryStr = "";
@@ -94,6 +94,7 @@ public class FABaseDaoImpl implements FABaseDao{
 		response.addParam(GlobalConstant.ITEMS, (List<?>) query.getResultList());
 	}
 	
+	@Override
 	public void itemCount(RestRequest request, RestResponse response) throws Exception {
 		String itemName = (String) request.getParam(GlobalConstant.ITEMNAME);
 		String queryStr = "SELECT COUNT(*) FROM " + itemName;
@@ -138,6 +139,7 @@ public class FABaseDaoImpl implements FABaseDao{
 	
 	}
 	
+	@Override
 	public void item(RestRequest request, RestResponse response) throws Exception {
 		String tableName = (String) request.getParam(GlobalConstant.ITEMNAME);
 		if (tableName != null){
@@ -160,10 +162,12 @@ public class FABaseDaoImpl implements FABaseDao{
 		return attachmentMeta;
 	}
 	*/
+	@Override
 	public void saveAttachment(RestRequest request, RestResponse response) throws Exception {
 		
 	}
 	
+	@Override
 	public void deleteAttachment(RestRequest request, RestResponse response) throws Exception {
 		
 	}

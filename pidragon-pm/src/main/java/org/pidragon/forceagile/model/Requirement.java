@@ -32,6 +32,7 @@ import org.toasthub.core.general.model.RestRequest;
 import org.toasthub.core.general.model.RestResponse;
 import org.toasthub.core.general.model.WorkFlow;
 import org.toasthub.social.model.AttachmentMeta;
+import org.toasthub.social.model.UserRef;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -47,7 +48,7 @@ public class Requirement extends FaBaseEntity implements Serializable{
 	
 	private String title;
 	private String desc;
-	private Long ownerRefId;
+	private UserRef owner;
 	private double hourEstimate;
 	private double actualHours;
 	private Date startDate;
@@ -66,11 +67,11 @@ public class Requirement extends FaBaseEntity implements Serializable{
 		super();
 	}
 	
-	public Requirement(String title, String desc, Long ownerRefId) {
+	public Requirement(String title, String desc, UserRef owner) {
 		super();
 		this.setTitle(title);
 		this.setDesc(desc);
-		this.setOwnerRefId(ownerRefId);
+		this.setOwner(owner);
 	}
 
 	// Constructor for ajax
@@ -99,11 +100,11 @@ public class Requirement extends FaBaseEntity implements Serializable{
 	
 	@JsonView({View.Member.class,View.Admin.class})
 	@Column(name = "owner_id")
-	public Long getOwnerRefId() {
-		return ownerRefId;
+	public UserRef getOwner() {
+		return owner;
 	}
-	public void setOwnerRefId(Long ownerRefId) {
-		this.ownerRefId = ownerRefId;
+	public void setOwner(UserRef owner) {
+		this.owner = owner;
 	}
 
 	@JsonView({View.Member.class,View.Admin.class})

@@ -12,19 +12,20 @@
 
 package org.pidragon.forceagile.backlog;
 
+import org.pidragon.forceagile.model.BackLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.toasthub.core.common.UtilSvc;
 import org.toasthub.core.general.handler.ServiceProcessor;
-import org.toasthub.core.general.model.BaseEntity;
+import org.toasthub.core.general.model.GlobalConstant;
 import org.toasthub.core.general.model.RestRequest;
 import org.toasthub.core.general.model.RestResponse;
 import org.toasthub.core.preference.model.AppCachePageUtil;
 
 
 @Service("BackLogSvc")
-public class BackLogSvcImpl implements ServiceProcessor {
+public class BackLogSvcImpl implements BackLogSvc, ServiceProcessor {
 
 	@Autowired
 	@Qualifier("BackLogDao")
@@ -34,6 +35,7 @@ public class BackLogSvcImpl implements ServiceProcessor {
 	@Autowired
 	AppCachePageUtil appCachePageUtil;
 	
+	@Override
 	public void process(RestRequest request, RestResponse response) {
 		
 		String action = (String) request.getParams().get(GlobalConstant.ACTION);
@@ -43,16 +45,16 @@ public class BackLogSvcImpl implements ServiceProcessor {
 			request.addParam("appPageParamLoc", "response");
 			appCachePageUtil.getPageInfo(request,response);
 			this.itemCount(request, response);
-			count = (Long) response.getParam(BaseEntity.ITEMCOUNT);
+			count = (Long) response.getParam(GlobalConstant.ITEMCOUNT);
 			if (count != null && count > 0){
 				items(request, response);
 			}
 			break;
 		case "LIST":
 			request.addParam("appPageParamLoc", "response");
-			appCachePage.getPageInfo(request,response);
+			appCachePageUtil.getPageInfo(request,response);
 			this.itemCount(request, response);
-			count = (Long) response.getParam(BaseEntity.ITEMCOUNT);
+			count = (Long) response.getParam(GlobalConstant.ITEMCOUNT);
 			if (count != null && count > 0){
 				items(request, response);
 			}
@@ -61,7 +63,7 @@ public class BackLogSvcImpl implements ServiceProcessor {
 			item(request, response);
 			break;
 		case "SAVE":
-			appCachePage.getPageInfo(request,response);
+			appCachePageUtil.getPageInfo(request,response);
 			this.save(request, response);
 			break;
 		case "DELETE":
@@ -100,23 +102,23 @@ public class BackLogSvcImpl implements ServiceProcessor {
 		}
 	}
 	
-	@Authorize
+	//@Authorize
 	protected void save(RestRequest request, RestResponse response){
 		try {
 			// validate
 			utilSvc.validateParams(request, response);
 			
-			if ((Boolean) request.getParam(BaseEntity.VALID) == false) {
+			if ((Boolean) request.getParam(GlobalConstant.VALID) == false) {
 				utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Validation Error", response);
 				return;
 			}
 			// get existing item
-			if (request.containsParam(BaseEntity.ITEMID) && !request.getParam(BaseEntity.ITEMID).equals("")) {
+			if (request.containsParam(GlobalConstant.ITEMID) && !request.getParam(GlobalConstant.ITEMID).equals("")) {
 				backLogDao.item(request, response);
-				request.addParam(BaseEntity.ITEM, response.getParam(BaseEntity.ITEM));
-				response.getParams().remove(BaseEntity.ITEM);
+				request.addParam(GlobalConstant.ITEM, response.getParam(GlobalConstant.ITEM));
+				response.getParams().remove(GlobalConstant.ITEM);
 			} else {
-				request.addParam(BaseEntity.ITEM, new BackLog());
+				request.addParam(GlobalConstant.ITEM, new BackLog());
 			}
 			
 			// marshall
@@ -132,7 +134,7 @@ public class BackLogSvcImpl implements ServiceProcessor {
 		}
 	}
 	
-	@Authorize
+	//@Authorize
 	protected void delete(RestRequest request, RestResponse response){
 		try {
 			backLogDao.delete(request, response);

@@ -10,61 +10,63 @@
  * @author Edward H. Seufert
  */
 
-package com.pidragon.fa.svc;
+package org.pidragon.forceagile.codebranch;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
+import org.pidragon.forceagile.model.CodeBranch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.toasthub.core.common.UtilSvc;
+import org.toasthub.core.general.handler.ServiceProcessor;
+import org.toasthub.core.general.model.GlobalConstant;
+import org.toasthub.core.general.model.RestRequest;
+import org.toasthub.core.general.model.RestResponse;
+import org.toasthub.core.preference.model.AppCachePageUtil;
 
-import org.toasthub.core.general.model.AppCachePage;
-import org.toasthub.core.general.model.BaseEntity;
-import org.toasthub.core.general.model.ajax.RestRequest;
-import org.toasthub.core.general.model.ajax.RestResponse;
-import org.toasthub.core.general.model.handler.ServiceProcessor;
-import org.toasthub.core.general.svc.UtilSvc;
-import org.toasthub.core.security.svc.Authorize;
+@Service("CodeBranchSvc")
+public class CodeBranchSvcImpl implements ServiceProcessor, CodeBranchSvc {
 
-import com.pidragon.fa.dao.CodeBranchDao;
-import com.pidragon.fa.dao.CodeBranchDaoQual;
-import com.pidragon.fa.model.CodeBranch;
-
-
-@RequestScoped
-public class CodeBranchSvcImpl implements ServiceProcessor {
-
-	@Inject @CodeBranchDaoQual CodeBranchDao codeBranchDao;
-	@Inject UtilSvc utilSvc;
-	@Inject	AppCachePage appCachePage;
+	@Autowired
+	@Qualifier("CodeBranchDao")
+	CodeBranchDao codeBranchDao;
 	
+	@Autowired
+	UtilSvc utilSvc;
+	
+	@Autowired
+	AppCachePageUtil appCachePageUtil;
+	
+	@Override
 	public void process(RestRequest request, RestResponse response) {
-		String action = (String) request.getParams().get(BaseEntity.ACTION);
+		String action = (String) request.getParams().get(GlobalConstant.ACTION);
 		
 		Long count = 0l;
 		switch (action) {
 		case "INIT": 
-			request.addParam(AppCachePage.APPPAGEPARAMLOC, AppCachePage.RESPONSE);
-			appCachePage.getPageInfo(request,response);
+			request.addParam(appCachePageUtil.APPPAGEPARAMLOC, appCachePageUtil.RESPONSE);
+			appCachePageUtil.getPageInfo(request,response);
 			this.itemCount(request, response);
-			count = (Long) response.getParam(BaseEntity.ITEMCOUNT);
+			count = (Long) response.getParam(GlobalConstant.ITEMCOUNT);
 			if (count != null && count > 0){
 				this.items(request, response);
 			}
-			response.addParam(BaseEntity.ITEMNAME, request.getParam(BaseEntity.ITEMNAME));
+			response.addParam(GlobalConstant.ITEMNAME, request.getParam(GlobalConstant.ITEMNAME));
 			break;
 		case "LIST":
-			request.addParam(AppCachePage.APPPAGEPARAMLOC, AppCachePage.RESPONSE);
-			appCachePage.getPageInfo(request,response);
+			request.addParam(appCachePageUtil.APPPAGEPARAMLOC, appCachePageUtil.RESPONSE);
+			appCachePageUtil.getPageInfo(request,response);
 			this.itemCount(request, response);
-			count = (Long) response.getParam(BaseEntity.ITEMCOUNT);
+			count = (Long) response.getParam(GlobalConstant.ITEMCOUNT);
 			if (count != null && count > 0){
 				this.items(request, response);
 			}
-			response.addParam(BaseEntity.ITEMNAME, request.getParam(BaseEntity.ITEMNAME));
+			response.addParam(GlobalConstant.ITEMNAME, request.getParam(GlobalConstant.ITEMNAME));
 			break;
 		case "SHOW":
 			this.item(request, response);
 			break;
 		case "SAVE":
-			appCachePage.getPageInfo(request,response);
+			appCachePageUtil.getPageInfo(request,response);
 			this.save(request, response);
 			break;
 		case "DELETE":
@@ -103,23 +105,23 @@ public class CodeBranchSvcImpl implements ServiceProcessor {
 		}
 	}
 	
-	@Authorize
+	//@Authorize
 	protected void save(RestRequest request, RestResponse response){
 		try {
 			// validate
 			utilSvc.validateParams(request, response);
 			
-			if ((Boolean) request.getParam(BaseEntity.VALID) == false) {
+			if ((Boolean) request.getParam(GlobalConstant.VALID) == false) {
 				utilSvc.addStatus(RestResponse.ERROR, RestResponse.ACTIONFAILED, "Validation Error", response);
 				return;
 			}
 			// get existing item
-			if (request.containsParam(BaseEntity.ITEMID) && !request.getParam(BaseEntity.ITEMID).equals("")) {
+			if (request.containsParam(GlobalConstant.ITEMID) && !request.getParam(GlobalConstant.ITEMID).equals("")) {
 				codeBranchDao.item(request, response);
-				request.addParam(BaseEntity.ITEM, response.getParam(BaseEntity.ITEM));
-				response.getParams().remove(BaseEntity.ITEM);
+				request.addParam(GlobalConstant.ITEM, response.getParam(GlobalConstant.ITEM));
+				response.getParams().remove(GlobalConstant.ITEM);
 			} else {
-				request.addParam(BaseEntity.ITEM, new CodeBranch());
+				request.addParam(GlobalConstant.ITEM, new CodeBranch());
 			}
 			// marshall
 			utilSvc.marshallFields(request, response);
@@ -132,7 +134,7 @@ public class CodeBranchSvcImpl implements ServiceProcessor {
 		}
 	}
 	
-	@Authorize
+	//@Authorize
 	protected void delete(RestRequest request, RestResponse response){
 		try {
 			codeBranchDao.delete(request, response);
